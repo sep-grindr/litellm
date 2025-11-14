@@ -23,17 +23,24 @@ beforeAll(() => {
 
 describe("ProviderSpecificFields", () => {
   it("should render the provider specific fields for OpenAI", async () => {
-    const { getByLabelText, getByPlaceholderText } = render(
+    const { getByLabelText, getByPlaceholderText, getByText, container } = render(
       <Form>
         <ProviderSpecificFields selectedProvider={Providers.OpenAI} />
       </Form>,
     );
 
     await waitFor(() => {
-      // Check for the API Base text input
-      const apiBaseInput = getByPlaceholderText("https://api.openai.com/v1");
-      expect(apiBaseInput).toBeInTheDocument();
-      expect(apiBaseInput).toHaveAttribute("type", "text");
+      // Check for the API Base select dropdown
+      const apiBaseLabel = getByLabelText("API Base");
+      expect(apiBaseLabel).toBeInTheDocument();
+      
+      // Check that the select shows the default value
+      const selectValue = getByText("https://api.openai.com/v1");
+      expect(selectValue).toBeInTheDocument();
+      
+      // Check that it's a select element (has the select class)
+      const selectElement = container.querySelector('.ant-select');
+      expect(selectElement).toBeInTheDocument();
 
       // Check for Organization field
       const orgInput = getByPlaceholderText("[OPTIONAL] my-unique-org");
@@ -42,6 +49,33 @@ describe("ProviderSpecificFields", () => {
       // Check for API Key field
       const apiKeyLabel = getByLabelText("OpenAI API Key");
       expect(apiKeyLabel).toBeInTheDocument();
+    });
+  });
+
+  it("should render the provider specific fields for OpenAI_Text", async () => {
+    const { container } = render(
+      <Form>
+        <ProviderSpecificFields selectedProvider={"OpenAI_Text" as Providers} />
+      </Form>,
+    );
+
+    await waitFor(() => {
+      // Check that the form has been rendered
+      const formElement = container.querySelector('form');
+      expect(formElement).toBeInTheDocument();
+      
+      // Check that at least one form item is rendered
+      const formItems = container.querySelectorAll('.ant-form-item');
+      expect(formItems.length).toBeGreaterThan(0);
+      
+      // Check for API Base label specifically
+      const labels = container.querySelectorAll('label');
+      const apiBaseLabel = Array.from(labels).find(label => label.textContent?.includes('API Base'));
+      expect(apiBaseLabel).toBeInTheDocument();
+      
+      // Check that the select element exists
+      const selectElement = container.querySelector('.ant-select');
+      expect(selectElement).toBeInTheDocument();
     });
   });
 
